@@ -79,7 +79,27 @@ public class MySQL {
         }
     }
     public boolean removeTokenBalance(Player p, int amnt){
+        try{
+            PreparedStatement s = connection.prepareStatement("select 'tokens' from users where uuid'" + p.getUniqueId() + "'");
+            ResultSet rs = s.executeQuery();
+            rs.next();
 
-        return true;
+            PreparedStatement removeUpdate = connection.prepareStatement("update users set tokens=? where uuid'" + p.getUniqueId() + "'");
+            if(getTokenBalance(p) - amnt < 0){
+                removeUpdate.close();
+                rs.close();
+                return false;
+            }else {
+                removeUpdate.setInt(1, getTokenBalance(p) - amnt);
+                s.executeUpdate();
+                removeUpdate.close();
+                rs.close();
+                return true;
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
 }
