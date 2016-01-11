@@ -8,6 +8,13 @@ import org.bukkit.entity.Player;
  * File created: 01/10/2016
  */
 public class TokenAPI {
+    private TokenAPI() { }
+
+    static TokenAPI instance = new TokenAPI();
+
+    public static TokenAPI getInstance() {
+        return instance;
+    }
     private static MySQL mySQL;
     public static void getTokenBalance(Player p){
         mySQL.getTokenBalance(p);
