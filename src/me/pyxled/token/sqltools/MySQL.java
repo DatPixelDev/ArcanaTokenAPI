@@ -1,119 +1,85 @@
 package me.pyxled.token.sqltools;
 
+import org.bukkit.entity.Player;
+
 import java.sql.*;
 
 /**
  * Pyxled Development 2016 (c)
  * File created: 01/09/2016
  */
-public class MySQL
-        extends Database
-{
-    static String user = "";
-    static String database = "";
-    static String password = "";
-    static String port = "";
-    static String hostname = "";
-    static Connection c = null;
+public class MySQL {
+    private Connection connection;
 
-    @SuppressWarnings("static-access")
-    public MySQL(String hostname, String portnmbr, String database, String username, String password)
-    {
-        this.hostname = hostname;
-        this.port = portnmbr;
-        this.database = database;
-        this.user = username;
-        this.password = password;
-    }
-
-    public Connection open()
-    {
-        try
-        {
+    public MySQL(String ip, String userName, String password, String db) {
+        try {
             Class.forName("com.mysql.jdbc.Driver");
-            c = DriverManager.getConnection("jdbc:mysql://" + hostname + ":" + port + "/" + database, user, password);
-            return c;
-        }
-        catch (SQLException e)
-        {
-            System.out.println("Could not connect to MySQL server! because: " + e.getMessage());
-        }
-        catch (ClassNotFoundException e)
-        {
-            System.out.println("JDBC Driver not found!");
-        }
-        return c;
-    }
-
-    @SuppressWarnings("static-access")
-    public boolean checkConnection()
-    {
-        if (this.c != null) {
-            return true;
-        }
-        return false;
-    }
-
-    @SuppressWarnings("static-access")
-    public Connection getConn()
-    {
-        return this.c;
-    }
-
-    public static Connection closeConnection(Connection c)
-    {
-        return c = null;
-    }
-
-    public ResultSet querySQL(String query)
-    {
-        Connection c = null;
-        if (checkConnection()) {
-            c = getConn();
-        } else {
-            c = open();
-        }
-        Statement s = null;
-        try
-        {
-            s = c.createStatement();
-        }
-        catch (SQLException e1)
-        {
-            e1.printStackTrace();
-        }
-        ResultSet ret = null;
-        try
-        {
-            ret = s.executeQuery(query);
-        }
-        catch (SQLException e)
-        {
+            connection = DriverManager.getConnection("jdbc:mysql://" + ip + "/" + db + "?user=" + userName + "&password=" + password);
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        closeConnection(c);
-
-        return ret;
     }
+    public void insertNewUser(Player p, int sb){
+        try{
+            PreparedStatement s = connection.prepareStatement("insert into users (uuid, ign, tokens)\nvalues('" + p.getUniqueId() + "', '" + p.getName() + "', " + sb + "');");
+            s.executeUpdate();
+            s.close();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    public int getTokenBalance(Player p){
+        try {
+            PreparedStatement s = connection.prepareStatement("select tokens from users where uuid'" + p.getUniqueId() + "'");
+            ResultSet rs = s.executeQuery();
+            if(rs.next()){
+               return rs.getInt("tokens");
+            } else {
+                return 0;
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            return 0;
+        }
+    }
+    public void setTokenBalance(Player p, int amnt){
+        try{
+            PreparedStatement s = connection.prepareStatement("select 'tokens' from users where uuid'" + p.getUniqueId() + "'");
+            ResultSet rs = s.executeQuery();
+            rs.next();
 
-    public void updateSQL(String update)
-    {
-        Connection c = null;
-        if (checkConnection()) {
-            c = getConn();
-        } else {
-            c = open();
+            PreparedStatement setUpdate = connection.prepareStatement("update users set tokens=? where uuid'" + p.getUniqueId() + "'");
+            setUpdate.setInt(1, amnt);
+            s.executeUpdate();
+            setUpdate.close();
+            s.close();
+            rs.close();
         }
-        Statement s = null;
-        try
-        {
-            s = c.createStatement();
-            s.executeUpdate(update);
+        catch (Exception e){
+            e.printStackTrace();
         }
-        catch (SQLException e1)
-        {
-            e1.printStackTrace();
+    }
+    public void addTokenBalance(Player p, int amnt){
+        try{
+            PreparedStatement s = connection.prepareStatement("select 'tokens' from users where uuid'" + p.getUniqueId() + "'");
+            ResultSet rs = s.executeQuery();
+            rs.next();
+
+            PreparedStatement addUpdate = connection.prepareStatement("update users set tokens=? where uuid'" + p.getUniqueId() + "'");
+            addUpdate.setInt(1, getTokenBalance(p) + amnt);
+            s.executeUpdate();
+            addUpdate.close();
+            s.close();
+            rs.close();
         }
-        closeConnection(c);
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    public boolean removeTokenBalance(Player p, int amnt){
+
+        return true;
     }
 }
