@@ -15,17 +15,17 @@ public class TokenAPI {
     public static TokenAPI getInstance() {
         return instance;
     }
-    private static MySQL mySQL;
-    public static void getTokenBalance(Player p){
+    MySQL mySQL;
+    public void getTokenBalance(Player p){
         mySQL.getTokenBalance(p);
     }
-    public static void setTokenBalance(Player p, int amnt){
+    public void setTokenBalance(Player p, int amnt){
         mySQL.setTokenBalance(p, amnt);
     }
-    public static void removeTokenBalace(Player p, int amnt){
-        mySQL.removeTokenBalance(p, amnt);
+    public boolean removeTokenBalace(Player p, int amnt){
+        return mySQL.removeTokenBalance(p, amnt);
     }
-    public static void addTokenBalace(Player p, int amnt){
+    public void addTokenBalace(Player p, int amnt){
         mySQL.addTokenBalance(p, amnt);
     }
 }
